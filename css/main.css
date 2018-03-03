@@ -1,0 +1,73 @@
+/* Body */
+.default-bg {
+    /* background-color: #000;
+    background-image: url("../assets/bg-img.jpeg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    width:100%; */
+
+    background: url("../assets/bg-img.jpeg") no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    padding: 0;
+}
+
+.main-body {
+    margin: 10px 0;
+    padding: 20px;
+    color: #000;
+    background-color: #8769b6;
+}
+
+/* Search */
+.form-control {
+    display: inline-block;
+    width: 250px;
+}
+
+
+/* Table */
+
+/* table{
+    table-layout: fixed;
+}
+
+th td{
+    word-wrap: break-word;
+} */
+
+/* td{
+    border:1px solid #000;
+} */
+
+/* tr td {
+    white-space: nowrap;
+} */
+
+/* tr td:last-child{
+    word-wrap: break-word;
+} */
+
+
+/* Navbar */
+
+#navbar {
+    padding: 10px 0;
+    background-color: #000;
+}
+#navbar-brand {
+    font-size: 25px;
+    font-weight: bolder;
+    color: #b6f486;
+}
+
+/* Footer */
+
+.footer {
+    background: linear-gradient(transparent 0%, #000 50%);
+    color: #b6f486;
+    text-align: center;
+    padding: 25px 0 10px 0;
+}
