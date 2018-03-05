@@ -46,21 +46,11 @@
                         <div class="form-group">
                             <input type="text" class="form-control" id="date" placeholder="Date (m/d/yyy)">
                             <input type="text" class="form-control" id="city" placeholder="City">
-
-                            <select type="text" class="form-control" id="state">
-                                <option value="" selected disabled>State</option>
-                            </select>
-
-                            <select type="text" class="form-control" id="country">
-                                <option value="" selected disabled>Country</option>
-                            </select>
-
-                            <select type="text" class="form-control" id="shape">
-                                <option value="" selected disabled>Shape</option>
-                            </select>
-
-                           <a id="search" class="btn btn-default">Search</a>
-                           <a id="reset" class="btn btn-default">Reset</a>
+                            <select type="text" class="form-control" id="state"></select>
+                            <select type="text" class="form-control" id="country"></select>
+                            <select type="text" class="form-control" id="shape"></select>
+                            <a id="search" class="btn btn-default">Search</a>
+                            <a id="reset" class="btn btn-default">Reset</a>
                         </div>
                     </div>
                 </div>
@@ -68,7 +58,7 @@
 
                 <div id="main-table" class="row main-body">
                     <div class="col">
-                        <ul class="pagination">
+                        <ul id="pagination" class="pagination">
                             <!-- <li>
                                 <a href="#main-table" aria-label="Previous" class="previousBtn">
                                 <span aria-hidden="true">&laquo;</span>

@@ -1,19 +1,21 @@
 // Get references to the tbody element, input field and button
-var $tbody = document.querySelector("tbody");
-var $dateInput = document.querySelector("#date");
-var $cityInput = document.querySelector("#city");
-var $stateInput = document.querySelector("#state");
-var $countryInput = document.querySelector("#country");
-var $shapeInput = document.querySelector("#shape");
-var $searchBtn = document.querySelector("#search");
-var $resetBtn = document.querySelector("#reset");
+var $tbody = document.querySelector('tbody');
+var $dateInput = document.querySelector('#date');
+var $cityInput = document.querySelector('#city');
+var $stateInput = document.querySelector('#state');
+var $countryInput = document.querySelector('#country');
+var $shapeInput = document.querySelector('#shape');
+var $searchBtn = document.querySelector('#search');
+var $resetBtn = document.querySelector('#reset');
+
 
 // Add an event listener to the searchButton, call handleSearchButtonClick when clicked
-$searchBtn.addEventListener("click", handleSearchButtonClick);
-$resetBtn.addEventListener("click", handleResetButtonClick);
+$searchBtn.addEventListener('click', handleSearchButtonClick);
+$resetBtn.addEventListener('click', resetData);
 
 // Set filteredData to dataSet initially
 var filteredData = dataSet;
+var fields;
 
 // Find all unique values for dropdowns
 var allStates = [...new Set(dataSet.map(data => data.state))];
@@ -22,29 +24,47 @@ var allShapes = [...new Set(dataSet.map(data => data.shape))];
 
 // Set pagination variables
 var pageList = new Array();
-var currentPage = 1;
-var numberPerPage = 25;
+var currentPage = 0;
+var numberPerPage = 50;
 var numberOfPages;
 
 function resetData(){
     filteredData = dataSet;
     filteredData.forEach( data => delete data.durationMinutes );
+
+    // Get all fields
+    fields = Object.keys(filteredData[0]);
+
+    currentPage = 0;
+
+    // Render dropdowns
+    resetFields();
+    displaySelectedRows()
+    // renderPageButtons();
+    // displaySelectedRows();
 };
 
 // Function to create dropdown
-function renderDropdown(arr, $parent) {
+function renderDropdown(arr, $parent, dropdown) {
     arr.sort();
+    $parent.innerHTML = '<option value="" selected disabled>' + dropdown + '</option>';
 
     for (i=0 ; i < arr.length ; i++) {
-        var $option = document.createElement("option");
+        var $option = document.createElement('option');
         $option.innerText = arr[i];
         $parent.appendChild($option);
     }
 };
 
+function resetFields(){
+    renderDropdown(allStates, $stateInput, 'state');
+    renderDropdown(allCountries, $countryInput, 'country');
+    renderDropdown(allShapes, $shapeInput, 'shape');
+}
+
 // renderTable renders the filteredAddresses to the tbody
 function renderTable(start,end) {
-    $tbody.innerHTML = "";
+    $tbody.innerHTML = '';
 
     var c=0;
     for (var i=start, c; i<end; i++,c++) {
@@ -67,7 +87,7 @@ function renderTable(start,end) {
 
 function handleSearchButtonClick() {
 
-    var inputArr = [["datetime",$dateInput],["city",$cityInput],["state",$stateInput],["country",$countryInput],["shape",$shapeInput]];
+    var inputArr = [['datetime',$dateInput],['city',$cityInput],['state',$stateInput],['country',$countryInput],['shape',$shapeInput]];
 
     var query = {};
 
@@ -93,10 +113,6 @@ function handleSearchButtonClick() {
 
     filteredData = filteredData.filter(function(data) {
         for(var key in query) {
-            // if (key === "datetime") {
-            //     console.log(query[key] +" "+ data[key]);
-            //     // return false;
-            // }
             if(data[key] === undefined || data[key] != query[key])
                 return false;
         }
@@ -104,64 +120,76 @@ function handleSearchButtonClick() {
     });
     console.log(filteredData.length);
 
-    renderTable()
+    renderPageButtons();
+    displaySelectedRows();
 };
 
-function handleResetButtonClick() {
-    console.log('reset');
-
-
-    resetData();
-    renderTable();
-}
-
-function paginate() {
+function renderPageButtons() {
     numberOfPages = Math.ceil(filteredData.length / numberPerPage);
     console.log(numberOfPages);
 
-    var firstItem;
-    var lastItem;
+    $ul = document.querySelector('#pagination');
+    $ul.innerHTML = '';
 
-    if (numberOfPages === 1) {
-        console.log('there is less than 1 page');
-        firstItem = 0;
-        lastItem = filteredData.length;
+    var $li = document.createElement('li');
+    $li.innerHTML = '<a href="#main-table" aria-label="Previous" id="$previousPage"><span aria-hidden="true">&laquo;</span></a>';
+    $ul.appendChild($li);
+
+    for (i=0; i<numberOfPages; i++) {
+        var $li = document.createElement('li');
+        var $a = document.createElement('a');
+
+        $a.setAttribute('class','pageNumber');
+        $a.setAttribute('id',i);
+        // $a.setAttribute('href','');
+        $a.innerText = i+1;
+
+        $li.appendChild($a);
+        $ul.appendChild($li);
     }
-    else {
-        console.log('there are so many pages', numberOfPages);
-        firstItem = 25;
-        lastItem = 35;
+
+    $li = document.createElement('li');
+    $li.innerHTML = '<a href="#main-table" aria-label="Next" id="$nextPage"><span aria-hidden="true">&raquo;</span></a>';
+    $ul.appendChild($li);
+
+    var $nextPage = document.querySelector('#next');
+    var $numberPage = document.getElementsByClassName('pageNumber');
+    var $previousPage = document.querySelector('#previous');
+
+    // $nextPage.addEventListener('click', handleNextClick);
+    // $previousPage.addEventListener('click',handlePreviousClick);
+
+    for (var i=0; i < $numberPage.length; i++) {
+        $numberPage[i].addEventListener('click', handlePageClick);
     };
 
+};
 
+function displaySelectedRows() {
 
+    var firstItem = currentPage * numberPerPage;
+    var lastItem;
 
-
+    if ((filteredData.length-firstItem)>numberPerPage) {
+        lastItem = firstItem + numberPerPage;
+    }
+    else {
+        lastItem = firstItem + (filteredData.length - firstItem);
+    }
+    console.log(firstItem);
+    console.log(lastItem);
 
     renderTable(firstItem,lastItem);
+};
+
+
+
+function handlePageClick(page) {
+    console.log('you clicked on a page!!!!');
+    currentPage = event.target.id;
+
+    displaySelectedRows();
 }
-
-function populatePagination() {
-
-}
-
-
-
-
-
-
 
 resetData();
-// Get all fields
-var fields = Object.keys(filteredData[0]);
-console.log(fields);
-
-paginate()
-// renderTable(25,35);
-console.log(filteredData);
-console.log("Table Rendered");
-
-renderDropdown(allStates, $stateInput);
-renderDropdown(allCountries, $countryInput);
-renderDropdown(allShapes, $shapeInput);
-console.log("Dropdowns Rendered");
+renderPageButtons();
