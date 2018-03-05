@@ -8,6 +8,10 @@ var $shapeInput = document.querySelector('#shape');
 var $searchBtn = document.querySelector('#search');
 var $resetBtn = document.querySelector('#reset');
 
+var $nextPage;
+var $numberPage;
+var $previousPage;
+
 
 // Add an event listener to the searchButton, call handleSearchButtonClick when clicked
 $searchBtn.addEventListener('click', handleSearchButtonClick);
@@ -96,6 +100,12 @@ function handleSearchButtonClick() {
             var val = inputArr[i][1].value.trim().toLowerCase();
             console.log(val);
             inputArr[i][1] = val;
+
+            if (i === 0) {
+                var date = val.split('/');
+                console.log(date);
+            };
+
         }
         catch(err) {
             inputArr[i][1] = 0;
@@ -109,8 +119,7 @@ function handleSearchButtonClick() {
         }
     };
 
-    console.log(query);
-
+    // Filter data based on query
     filteredData = filteredData.filter(function(data) {
         for(var key in query) {
             if(data[key] === undefined || data[key] != query[key])
@@ -118,7 +127,6 @@ function handleSearchButtonClick() {
         }
         return true;
     });
-    console.log(filteredData.length);
 
     renderPageButtons();
     displaySelectedRows();
@@ -126,47 +134,62 @@ function handleSearchButtonClick() {
 
 function renderPageButtons() {
     numberOfPages = Math.ceil(filteredData.length / numberPerPage);
-    console.log(numberOfPages);
 
     $ul = document.querySelector('#pagination');
-    $ul.innerHTML = '';
 
-    var $li = document.createElement('li');
-    $li.innerHTML = '<a href="#main-table" aria-label="Previous" id="$previousPage"><span aria-hidden="true">&laquo;</span></a>';
-    $ul.appendChild($li);
+    if (numberOfPages>1) {
+        $ul.innerHTML = '';
+        pageList = Array.apply(null, Array(numberOfPages)).map(function (_, i) {return i;});
 
-    for (i=0; i<numberOfPages; i++) {
         var $li = document.createElement('li');
-        var $a = document.createElement('a');
-
-        $a.setAttribute('class','pageNumber');
-        $a.setAttribute('id',i);
-        // $a.setAttribute('href','');
-        $a.innerText = i+1;
-
-        $li.appendChild($a);
+        $li.innerHTML = '<a href="#main-table" id="previous">&laquo;</a>';
         $ul.appendChild($li);
+
+        for (i=0; i<numberOfPages; i++) {
+            var $li = document.createElement('li');
+            var $a = document.createElement('a');
+
+            $a.setAttribute('class','pageNumber');
+            $a.setAttribute('id',i);
+            // $a.setAttribute('href','');
+            $a.innerText = i+1;
+
+            $li.appendChild($a);
+            $ul.appendChild($li);
+        }
+
+        $li = document.createElement('li');
+        $li.innerHTML = '<a href="#main-table" id="next">&raquo;</a>';
+        $ul.appendChild($li);
+
+        addEventListners();
     }
-
-    $li = document.createElement('li');
-    $li.innerHTML = '<a href="#main-table" aria-label="Next" id="$nextPage"><span aria-hidden="true">&raquo;</span></a>';
-    $ul.appendChild($li);
-
-    var $nextPage = document.querySelector('#next');
-    var $numberPage = document.getElementsByClassName('pageNumber');
-    var $previousPage = document.querySelector('#previous');
-
-    // $nextPage.addEventListener('click', handleNextClick);
-    // $previousPage.addEventListener('click',handlePreviousClick);
-
-    for (var i=0; i < $numberPage.length; i++) {
-        $numberPage[i].addEventListener('click', handlePageClick);
+    // If there's only 1 page, don't show pagination
+    else {
+        $ul.parentElement.remove();
     };
-
 };
 
-function displaySelectedRows() {
+function addEventListners() {
+    $nextPage = document.querySelector('#next');
+    $numberPage = document.getElementsByClassName('pageNumber');
+    $previousPage = document.querySelector('#previous');
 
+    $nextPage.addEventListener('click', handleNextClick);
+    $previousPage.addEventListener('click',handlePreviousClick);
+
+    // Add event listener to all page numbers
+    for (var i=0; i < $numberPage.length; i++) {
+        $numberPage[i].addEventListener('click', handlePageClick);
+    }
+
+    // Make first item "active"
+    var $page = document.getElementById(currentPage);
+    var $parent = $page.parentElement;
+    addActiveState($parent);
+}
+
+function displaySelectedRows() {
     var firstItem = currentPage * numberPerPage;
     var lastItem;
 
@@ -176,18 +199,57 @@ function displaySelectedRows() {
     else {
         lastItem = firstItem + (filteredData.length - firstItem);
     }
+
     console.log(firstItem);
     console.log(lastItem);
 
     renderTable(firstItem,lastItem);
 };
 
+function removeActiveState() {
+    var $page = document.getElementById(currentPage);
+    var $parent = $page.parentElement;
+    $parent.classList.remove("active");
+}
+
+function addActiveState($parent) {
+    $parent.setAttribute('class','active');
+
+    $nextPage.parentElement.classList.remove('disabled');
+    $previousPage.parentElement.classList.remove('disabled');
+
+    if (currentPage == 0) {
+        $previousPage.parentElement.setAttribute('class','disabled');
+    };
+    if (currentPage == (numberOfPages-1)) {
+        $nextPage.parentElement.setAttribute('class','disabled');
+    };
+};
 
 
-function handlePageClick(page) {
-    console.log('you clicked on a page!!!!');
+function handlePageClick() {
+    removeActiveState()
     currentPage = event.target.id;
+    $parent = event.target.parentElement;
+    addActiveState($parent);
+    displaySelectedRows();
+}
 
+function handleNextClick() {
+    removeActiveState()
+    currentPage = currentPage + 1;
+    var $page = document.getElementById(currentPage);
+    var $parent = $page.parentElement;
+    addActiveState($parent);
+    displaySelectedRows();
+}
+
+function handlePreviousClick() {
+    removeActiveState()
+    currentPage = currentPage - 1;
+    var $page = document.getElementById(currentPage);
+    var $parent = $page.parentElement;
+    addActiveState($parent);
     displaySelectedRows();
 }
 
