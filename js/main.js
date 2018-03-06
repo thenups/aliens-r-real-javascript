@@ -41,11 +41,10 @@ function resetData(){
 
     currentPage = 0;
 
-    // Render dropdowns
+    // Reset Table body (page buttons, rows displayed)
     resetFields();
-    displaySelectedRows()
-    // renderPageButtons();
-    // displaySelectedRows();
+    renderPageButtons();
+    displaySelectedRows();
 };
 
 // Function to create dropdown
@@ -135,28 +134,53 @@ function handleSearchButtonClick() {
 function renderPageButtons() {
     numberOfPages = Math.ceil(filteredData.length / numberPerPage);
 
-    $ul = document.querySelector('#pagination');
+    $pagesDiv = document.querySelector('#paginate');
+    $pagesDiv.innerHTML = '';
+    console.log('cleared div');
+
+    var $ellipsesli1 = document.createElement('li');
+    var $ellipsesa = document.createElement('a');
+    $ellipsesa.setAttribute('class','disabled');
+    $ellipsesa.innerText = '...';
+
+    $ellipsesli1.appendChild($ellipsesa);
+
+    var $ellipsesli2 = $ellipsesli1.cloneNode(true);
 
     if (numberOfPages>1) {
-        $ul.innerHTML = '';
-        pageList = Array.apply(null, Array(numberOfPages)).map(function (_, i) {return i;});
+        $ul = document.createElement('ul');
+        $ul.setAttribute('class','pagination');
+        $ul.setAttribute('id','pagination');
+        $pagesDiv.appendChild($ul);
 
         var $li = document.createElement('li');
         $li.innerHTML = '<a href="#main-table" id="previous">&laquo;</a>';
         $ul.appendChild($li);
 
-        for (i=0; i<numberOfPages; i++) {
-            var $li = document.createElement('li');
-            var $a = document.createElement('a');
 
-            $a.setAttribute('class','pageNumber');
-            $a.setAttribute('id',i);
-            // $a.setAttribute('href','');
-            $a.innerText = i+1;
 
-            $li.appendChild($a);
-            $ul.appendChild($li);
-        }
+        if (numberOfPages < 5) {
+            addPageListItems(0, numberOfPages);
+        } else {
+            addPageListItems(0, 1);
+
+            if (currentPage >= 0 && currentPage<2) {
+                addPageListItems(1, 3);
+                $ul.appendChild($ellipsesli1);
+            } else if (currentPage<=numberOfPages && currentPage>numberOfPages-3) {
+                $ul.appendChild($ellipsesli1);
+                addPageListItems(numberOfPages-3, numberOfPages-1);
+            } else {
+                $ul.appendChild($ellipsesli1);
+                console.log('add this', currentPage-1);
+                console.log('until this', currentPage+2);
+                addPageListItems(currentPage-1, currentPage+2);
+                $ul.appendChild($ellipsesli2);
+            }
+
+            addPageListItems(numberOfPages-1, numberOfPages);
+        };
+
 
         $li = document.createElement('li');
         $li.innerHTML = '<a href="#main-table" id="next">&raquo;</a>';
@@ -166,8 +190,25 @@ function renderPageButtons() {
     }
     // If there's only 1 page, don't show pagination
     else {
-        $ul.parentElement.remove();
+        $ul.remove();
     };
+};
+
+function addPageListItems(starter, limit){
+    var $ul = document.querySelector('#pagination');
+
+    for (i=starter; i<limit; i++) {
+        var $li = document.createElement('li');
+        var $a = document.createElement('a');
+
+        $a.setAttribute('class','pageNumber');
+        $a.setAttribute('id',i);
+        // $a.setAttribute('href','');
+        $a.innerText = i+1;
+
+        $li.appendChild($a);
+        $ul.appendChild($li);
+    }
 };
 
 function addEventListners() {
@@ -200,9 +241,6 @@ function displaySelectedRows() {
         lastItem = firstItem + (filteredData.length - firstItem);
     }
 
-    console.log(firstItem);
-    console.log(lastItem);
-
     renderTable(firstItem,lastItem);
 };
 
@@ -226,32 +264,44 @@ function addActiveState($parent) {
     };
 };
 
-
 function handlePageClick() {
-    removeActiveState()
-    currentPage = event.target.id;
-    $parent = event.target.parentElement;
+    removeActiveState();
+    console.log(currentPage);
+    currentPage = parseInt(event.target.id);
+    console.log(currentPage);
+
+    var $page = document.getElementById(currentPage);
+    var $parent = $page.parentElement;
     addActiveState($parent);
+
     displaySelectedRows();
-}
+    renderPageButtons();
+};
 
 function handleNextClick() {
-    removeActiveState()
-    currentPage = currentPage + 1;
+    removeActiveState();
+
+    currentPage = parseInt(currentPage) + 1;
     var $page = document.getElementById(currentPage);
     var $parent = $page.parentElement;
     addActiveState($parent);
+
     displaySelectedRows();
-}
+    renderPageButtons();
+};
 
 function handlePreviousClick() {
-    removeActiveState()
-    currentPage = currentPage - 1;
+    removeActiveState();
+
+    currentPage = parseInt(currentPage) - 1;
+
     var $page = document.getElementById(currentPage);
     var $parent = $page.parentElement;
     addActiveState($parent);
+
     displaySelectedRows();
-}
+    renderPageButtons();
+};
 
 resetData();
 renderPageButtons();
